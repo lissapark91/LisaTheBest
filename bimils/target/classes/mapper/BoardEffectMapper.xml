@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="BoardEffect">
+  	
+  	<select id="selectBoardEffectList" resultType="BoardEffect" parameterType="int">
+  	
+  	SELECT
+  		  bo_seq_no
+		, effect_class
+		, effect_start
+		, effect_end
+		, effect_del
+	FROM
+		bm_bo_effect
+	WHERE
+		bo_seq_no = #{bo_seq_no}
+	AND
+		effect_del = 'N'
+  	  	
+  	</select>
+  	
+  	<insert id="insertBoardEffect" parameterType="BoardEffect">
+  	
+  	INSERT INTO BM_BO_EFFECT (
+	      bo_seq_no
+		, effect_class
+		, effect_start
+		, effect_end
+		, effect_del
+	) VALUES (
+	      #{bo_seq_no}
+		, #{effect_class}
+		, SYSDATE
+		, SYSDATE + 3
+	);
+  	
+  	
+  	</insert>
+  	
+  	
+  	<update id="deleteBoardEffect" parameterType="map">
+  		
+  	UPDATE bm_bo_effect SET
+		effect_del = 'Y'
+	WHERE bo_seq_no = #{bo_seq_no}
+	AND effect_class = #{effect_class}
+  	
+  	</update>
+  
+  </mapper>

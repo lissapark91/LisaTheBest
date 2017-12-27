@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- mapper : select, insert, update, delete -->
+<mapper namespace="CommonMapper"> <!-- class path를 잘 써주어야 한다. 클래스 풀네임 -->
+	
+	<sql id="pageHeader">  
+	
+		 SELECT * FROM
+		(
+		    SELECT
+		    ROWNUM AS RNUM,
+		    TB.*
+		    FROM
+		    (
+		        /* 핵심업무로직 */
+		 
+	</sql>  
+	
+	<sql id="pageFooter">
+		   
+		    ) TB 
+		) WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	
+	</sql>
+  
+
+</mapper>

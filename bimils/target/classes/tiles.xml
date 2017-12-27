@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<!-- tiles 설정 파일 -->
+<tiles-definitions>
+	<definition name="default" template="/WEB-INF/views/layout/template.jsp">
+		<!-- <put-attribute name="title" expression="${pageTitle}" /> -->
+		<put-attribute name="header" value="/WEB-INF/views/layout/header.jsp" />
+		<put-attribute name="nav" value="/WEB-INF/views/layout/nav.jsp" />
+		<put-attribute name="body" value="/WEB-INF/views/layout/empty.jsp" />
+		<put-attribute name="footer" value="/WEB-INF/views/layout/footer.jsp" />
+	</definition>
+
+	<!-- 기본 템플릿과 다른 구조의 경우 확실하게 잡아준다. -->
+	<definition name="login/loginForm" template="/WEB-INF/views/layout/emptyTemplate.jsp">
+		<!-- <put-attribute name="header" value="/WEB-INF/views/layout/header.jsp" /> -->
+		<!-- <put-attribute name="nav" value="/WEB-INF/views/layout/nav.jsp" /> -->
+		<put-attribute name="body" value="/WEB-INF/views/login/loginForm.jsp" />
+		<put-attribute name="footer" value="/WEB-INF/views/layout/footer.jsp" />
+	</definition>
+	
+	<!-- view 이름을 name으로(controller가 view이름을 리턴할 때.. view이름에 해당하는 name을 찾는다. -->
+	<!-- <definition name="/member/memberList" extends="default"> 상속가능
+		<put-attribute name="body" value="/WEB-INF/views/member/memberList.jsp" />
+	</definition> -->
+
+	<definition name="*" extends="default">
+		<put-attribute name="body" value="/WEB-INF/views/{1}.jsp" />
+	</definition>
+
+	<definition name="*/*" extends="default">
+		<put-attribute name="body" value="/WEB-INF/views/{1}/{2}.jsp" />
+	</definition>
+
+	<definition name="*/*/*" extends="default">
+		<put-attribute name="body" value="/WEB-INF/views/{1}/{2}/{3}.jsp" />
+	</definition>
+
+</tiles-definitions>
+
