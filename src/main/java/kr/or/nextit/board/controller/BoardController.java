@@ -31,7 +31,7 @@ public class BoardController {
 	BoardService boardService;
 	@Autowired
 	FileItemService fileItemService;
-	   
+	//ww
 	@RequestMapping("/boardList")
 	public String boardList(@RequestParam(value="searchType", required=false, defaultValue="") String searchType, 
 			@RequestParam(value="searchWord", required=false, defaultValue="") String searchWord,
