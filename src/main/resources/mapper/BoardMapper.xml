@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- mapper : select, insert, update, delete -->
+<mapper namespace="kr.or.nextit.board.mapper.BoardMapper"> <!-- class path를 잘 써주어야 한다. 클래스 풀네임 -->
+  
+  <select id="selectBoardCount" resultType="int" parameterType="map"> <!-- result type : select한 데이터를 어디에 담을지 (Bean) -->
+  
+  	SELECT  
+		count(*) as count
+		FROM             
+		tb_board a, tb_member b      
+		WHERE              
+		a.bo_del_yn = 'N' 
+		AND a.bo_writer = b.mem_id
+	<if test=" searchWord != null and searchWord != '' ">
+		<if test=" searchType == '01' ">
+			AND a.bo_title LIKE '%' || #{searchWord} || '%'
+		</if>
+		<if test=" searchType == '02' ">
+			AND a.bo_content LIKE '%' || #{searchWord} || '%'
+		</if>
+		<if test=" searchType == '03' ">
+			AND (a.bo_title LIKE '%' || #{searchWord} || '%' OR a.bo_content LIKE '%' || #{searchWord} || '%')
+		</if>	
+		<if test=" searchType == '04' ">
+			AND b.mem_name = #{searchWord}
+		</if>
+	</if> 
+		
+  </select>
+
+  <select id="selectBoardList" resultType="Board" parameterType="map"> <!-- result type : select한 데이터를 어디에 담을지 (Bean) -->
+  	/* 페이징 */
+  	<include refid="CommonMapper.pageHeader"></include>
+	SELECT
+	    a.bo_seq_no,
+	    a.bo_type,
+	    a.bo_title,
+	    a.bo_content,
+	    a.bo_writer,
+	    b.mem_name as bo_writer_name,
+	    a.bo_hit_cnt,
+	    a.bo_open_yn,
+	    a.bo_del_yn,
+	    a.reg_user,
+	    a.reg_date,
+	    a.upd_user,
+	    a.upd_date
+	FROM
+	    tb_board a, tb_member b
+	WHERE
+		a.bo_writer = b.mem_id
+	AND 
+		a.bo_del_yn = 'N'
+	
+	<if test=" searchWord != null and searchWord != '' ">
+		<if test=" searchType == '01' ">
+			AND a.bo_title LIKE '%' || #{searchWord} || '%'
+		</if>
+		<if test=" searchType == '02' ">
+			AND a.bo_content LIKE '%' || #{searchWord} || '%'
+		</if>
+		<if test=" searchType == '03' ">
+			AND (a.bo_title LIKE '%' || #{searchWord} || '%' OR a.bo_content LIKE '%' || #{searchWord} || '%')
+		</if>	
+		<if test=" searchType == '04' ">
+			AND b.mem_name = #{searchWord}
+		</if>
+	</if>
+	ORDER BY bo_seq_no DESC
+	/* 페이징 */
+	<include refid="CommonMapper.pageFooter"></include>
+    
+  </select>
+
+  <select id="selectBoard" resultType="Board" parameterType="int"> <!-- 엘리엇으로 string으로만 써도 괜찮다.(소문자시작) -->
+	  SELECT
+		    a.bo_seq_no,
+		    a.bo_type,
+		    a.bo_title,
+		    a.bo_content,
+		    a.bo_writer,
+		    (SELECT b.mem_name 
+		     FROM tb_member b 
+		     WHERE a.bo_writer = b.mem_id) as bo_writer_name,
+		    a.bo_hit_cnt,
+		    a.bo_open_yn,
+		    a.bo_del_yn,
+		    a.reg_user,
+		    a.reg_date,
+		    a.upd_user,
+		    a.upd_date
+		FROM
+		    tb_board a
+		WHERE
+			a.bo_seq_no = #{bo_seq_no}
+		ORDER BY bo_seq_no DESC   
+  </select>
+  
+  <insert id="insertBoard" parameterType="Board"> <!-- 엘리어스를 정해놨기때문에 Board로 써도됨 -->
+  
+  <!-- insert subquery 안에 selectKey가 있다. order : 쿼리 수행 순서 -->
+  <selectKey keyProperty="bo_seq_no" resultType="int" order="BEFORE">
+  	SELECT SEQ_BO_SEQ_NO.NEXTVAL FROM DUAL
+  </selectKey>
+  
+	  INSERT INTO TB_BOARD (
+	    bo_seq_no,
+	    bo_type,
+	    bo_title,
+	    bo_content,
+	    bo_writer,
+	    bo_hit_cnt,
+	    bo_open_yn,
+	    bo_del_yn,
+	    reg_user,
+	    reg_date,
+	    upd_user,
+	    upd_date
+	  ) VALUES (
+	    #{bo_seq_no},
+	    #{bo_type},
+	    #{bo_title},
+	    #{bo_content},
+	    #{bo_writer},
+	    0,
+	    NVL(#{bo_open_yn}, 'Y'),
+	    'N',
+	    #{bo_writer},
+	    SYSDATE",
+	    #{bo_writer},
+	    SYSDATE
+	  )
+  </insert>
+  
+  <update id="updateBoard" parameterType="Board">
+	UPDATE tb_board SET 	
+		bo_type     = #{bo_type},
+		bo_title    = #{bo_title},
+		bo_content  = #{bo_content},
+		bo_writer   = #{bo_writer},
+		bo_open_yn  = #{bo_open_yn},
+		upd_user    = #{upd_user},
+		upd_date    = SYSDATE
+	WHERE
+ 		bo_seq_no = #{bo_seq_no}
+ 	
+  
+  </update>
+  
+  <update id="deleteBoard" parameterType="map">
+  	
+  	UPDATE tb_board SET 
+  		bo_del_yn = 'Y',
+  		upd_user = #{upd_user},
+	  	upd_date = SYSDATE
+  	WHERE
+  		bo_seq_no = #{bo_seq_no}
+  
+  </update>
+  
+  <update id="updateHitCnt" parameterType="int">
+  	
+  	UPDATE TB_BOARD SET 
+		bo_hit_cnt = bo_hit_cnt + 1
+		WHERE bo_seq_no = #{bo_seq_no} 
+  
+  
+  </update>
+  
+  
+
+</mapper>

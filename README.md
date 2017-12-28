@@ -1,2 +1,0 @@
-# LisaTheBest
-My first repository..☆

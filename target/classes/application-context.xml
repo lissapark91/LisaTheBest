@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+	
+	<!-- controller 빼고 다 -->
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<context:component-scan base-package="kr.or.nextit">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	<context:property-placeholder location="classpath:/db.properties"/>
+	
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+	  <property name="driverClassName" value="${jdbc.driver}"/>
+	  <property name="url" value="${jdbc.url}"/>
+	  <property name="username" value="${jdbc.username}"/>
+	  <property name="password" value="${jdbc.password}"/>
+	  
+	  <property name="validationQuery" value="select 1 from dual"></property>
+	  <property name="maxTotal" value="10"></property>
+	  <property name="maxIdle" value="5"></property>
+	  <property name="minIdle" value="4"></property>
+	  <property name="defaultAutoCommit" value="false"></property>	  
+	 </bean>
+	 
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	  <property name="dataSource" ref="dataSource"/>
+	 </bean>
+
+	
+	<!-- 트랜젝션 AOP 적용 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+<!-- 		<tx:method name="get*" read-only="true"/> -->
+			<tx:method name="*" rollback-for="Exception"/>
+		</tx:attributes>	
+	</tx:advice>	
+	
+	<aop:config>
+		<aop:pointcut expression="execution(public * kr.or.nextit..*Service.*(..))" id="servicePointCut"/>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="servicePointCut"/>
+	</aop:config>
+	
+	<!-- mybatis 설정 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="mapperLocations" value="classpath:/mapper/*Mapper.xml"></property>
+	</bean>
+	
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory"></constructor-arg>
+	</bean>
+	
+	<!-- mapper interface 등록 자동 스캔 -->
+	
+<!-- 	<mybatis-spring:scan base-package="kr.or.nextit.*.mapper, kr.or.nextit.*.*.mapper"/> -->
+	<mybatis-spring:scan base-package="kr.or.nextit" annotation="org.apache.ibatis.annotations.Mapper"/>
+	
+	<!-- <bean id="memberMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="kr.or.nextit.member.mapper.MemberMapper"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	<bean id="boardMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="kr.or.nextit.board.mapper.BoardMapper"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	<bean id="fileItemMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="kr.or.nextit.common.file.mapper.FileItemMapper"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean> -->
+	
+	
+	
+</beans>
